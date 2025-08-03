@@ -11,13 +11,46 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v3
 
-      - name: Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+      - name: Gerar Blacklist de palavras
+        run: |
+          # Definindo as palavras e variações
+          palavras=("idiota" "burro" "desgraçado" "fdp" "merda" "bosta" "otario" "viado" "fudido")
 
-      - name: Rodar o script
-        run: python .github/scripts/gerar_blacklist.py
+          # Mapeamento de Leet Speak para substituições
+          declare -A leet_map
+          leet_map=(["a"]="a 4 @ q z" ["e"]="e 3 w d r" ["i"]="i 1 ! u k" ["o"]="o 0 p l" ["u"]="u y j" ["s"]="s 5 \$ z a d" ["z"]="z 2 s x" ["l"]="l 1 i" ["c"]="c k" ["k"]="k c" ["f"]="f ph" ["g"]="g j" ["j"]="j g" ["x"]="x ch" ["h"]="h r")
+
+          # Função para gerar variações
+          generate_variations() {
+            word=$1
+            variations=("$word")
+
+            # Gerar variações usando o mapeamento
+            for ((i=0; i<${#word}; i++)); do
+              char=${word:i:1}
+              if [[ ${leet_map[$char]} ]]; then
+                new_variations=()
+                for variation in ${leet_map[$char]}; do
+                  for existing in "${variations[@]}"; do
+                    new_variations+=("${existing:0:i}$variation${existing:i+1}")
+                  done
+                done
+                variations=("${new_variations[@]}")
+              fi
+            done
+
+            echo "${variations[@]}"
+          }
+
+          # Criando a lista de variações
+          all_variations=()
+          for palavra in "${palavras[@]}"; do
+            variations=($(generate_variations $palavra))
+            all_variations+=("${variations[@]}")
+          done
+
+          # Remover duplicatas e salvar em blacklist.txt
+          echo "${all_variations[@]}" | tr ' ' '\n' | sort | uniq > blacklist.txt
 
       - name: Upload do arquivo gerado
         uses: actions/upload-artifact@v4
