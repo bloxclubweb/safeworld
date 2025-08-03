@@ -63,7 +63,8 @@ for palavra in palavroes:
     variacoes = gerar_variacoes(palavra)
     todas_variacoes.update(variacoes)
 
-with open("blacklist.txt", "w", encoding="utf-8") as f:
+# Salvando o arquivo na raiz do projeto
+with open("../../blacklist.txt", "w", encoding="utf-8") as f:
     f.write(", ".join(sorted(todas_variacoes)))
 
 print(f"✅ Geradas {len(todas_variacoes)} variações salvas em 'blacklist.txt'")
