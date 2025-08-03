@@ -2,7 +2,7 @@
 
 SafeWorld é um projeto simples, mas poderoso, criado para ajudar a manter comunidades no Discord mais seguras e saudáveis. Ele consiste em um arquivo .txt contendo palavras-chave e frases que podem ser utilizadas em sistemas de AutoMod (moderação automática) do Discord.
 
-> A última atualização do blocked_words.txt foi em 19/07/2025
+> A última atualização do blocked_words.txt foi em 02/08/2025
 
 
 ---
