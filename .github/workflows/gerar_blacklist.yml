@@ -23,4 +23,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: blacklist
-          path: .github/scripts/blacklist.txt
+          path: blacklist.txt
