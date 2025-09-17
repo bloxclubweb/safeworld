@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeWorld</title>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@600;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg: #17191A;
+  --text: #F2F2F2;
+  --number-color: #F2F2F2;
+  --btn-bg: #7900FF;
+  --btn-hover: #5e00cc;
+  --blob1: #AE67FF;
+  --blob2: #7900FF;
+  --blob3: rgba(174,103,255,0.7);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html, body{height:100%;}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Red Hat Display', sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
+}
+.page-bg{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.blob{
+  position:absolute;
+  border-radius:999%;
+  filter: blur(100px);
+  opacity:0.8;
+  mix-blend-mode: screen;
+  transform-origin:center;
+  will-change: transform;
+}
+.blob.b1{ width:800px; height:800px; left:-250px; top:-200px; background: radial-gradient(circle at 35% 35%, var(--blob1) 0%, rgba(174,103,255,0) 60%);}
+.blob.b2{ width:700px; height:700px; right:-200px; bottom:-180px; background: radial-gradient(circle at 65% 65%, var(--blob2) 0%, rgba(121,0,255,0) 60%);}
+.blob.b3{ width:520px; height:520px; left:60%; top:20%; background: radial-gradient(circle at 50% 50%, var(--blob3) 0%, rgba(121,0,255,0.15) 45%, rgba(0,0,0,0) 70%); opacity:0.7;}
+
+.container {
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  max-width:600px;
+  width:90%;
+  gap:15px;
+}
+
+.title {
+  font-size:2em;
+}
+
+.number {
+  font-size:3em;
+  font-weight:900;
+  color: var(--number-color);
+}
+
+.subtitle {
+  font-size:1.8em;
+  margin-bottom:15px;
+}
+
+button {
+  font-family: 'Red Hat Display', sans-serif;
+  font-size:1em;
+  padding:10px 20px;
+  background-color: var(--btn-bg);
+  color: var(--text);
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  transition: all 0.2s ease, transform 0.25s ease;
+}
+button:hover {
+  background-color: var(--btn-hover);
+  transform: translateY(-2px);
+}
+button.pop {
+  animation: popBtn 0.25s forwards;
+}
+@keyframes popBtn {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.85); }
+  100% { transform: scale(1.1); }
+}
+svg {
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  fill:currentColor;
+}
+
+@media (max-width:600px){
+  .title{ font-size:1.5em; }
+  .number{ font-size:2.5em; }
+  .subtitle{ font-size:1.4em; }
+  button{ font-size:0.9em; padding:8px 16px; }
+  svg{ width:18px; height:18px; }
+}
+</style>
+</head>
+<body>
+<div class="page-bg" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+
+<div class="container">
+  <div class="title">SafeWorld bloqueia</div>
+  <div class="number">0</div>
+  <div class="subtitle">Expressões ofensivas ou inapropriadas</div>
+  <button id="copyBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+      <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-520q0-17 11.5-28.5T160-720q17 0 28.5 11.5T200-680v520h400q17 0 28.5 11.5T640-120q0 17-11.5 28.5T600-80H200Zm160-240v-480 480Z"/>
+    </svg>
+    Copiar lista de palavras
+  </button>
+</div>
+
+<script>
+const blobs = document.querySelectorAll('.blob');
+blobs.forEach(blob => {
+  let x=Math.random()*200-100, y=Math.random()*200-100;
+  let dx=(Math.random()*2-1), dy=(Math.random()*2-1);
+  function moveBlob(){
+    x+=dx; y+=dy;
+    if(x>150||x<-150) dx*=-1;
+    if(y>150||y<-150) dy*=-1;
+    blob.style.transform=`translate(${x}px,${y}px)`;
+    requestAnimationFrame(moveBlob);
+  }
+  moveBlob();
+});
+
+const fileUrl = "https://raw.githubusercontent.com/bloxclubweb/safeworld/refs/heads/main/blocked_words.txt";
+const numberEl = document.querySelector(".number");
+const copyBtn = document.getElementById("copyBtn");
+let fullText = "";
+
+fetch(fileUrl)
+  .then(res=>res.text())
+  .then(text=>{
+    fullText=text;
+    const wordsArray = text.replace(/\n/g,'').split(',').map(w=>w.trim()).filter(w=>w.length>0);
+    const total = wordsArray.length;
+
+    function animateNumber(total, duration=2500) {
+        let start = null;
+        function step(timestamp) {
+            if(!start) start = timestamp;
+            const progress = timestamp - start;
+            const t = Math.min(progress/duration,1);
+            const eased = t<0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+            const current = Math.floor(eased * total);
+            numberEl.textContent = current;
+            if(progress<duration){
+                requestAnimationFrame(step);
+            } else {
+                numberEl.textContent = total;
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    animateNumber(total, 2500);
+  })
+  .catch(err=>{
+    numberEl.textContent="0";
+    console.error(err);
+  });
+
+copyBtn.addEventListener("click",()=>{
+  if(fullText){
+    copyBtn.classList.add('pop');
+    setTimeout(()=>copyBtn.classList.remove('pop'),250);
+
+    navigator.clipboard.writeText(fullText)
+      .then(()=>{
+        copyBtn.textContent="Copiado!";
+        setTimeout(()=>{
+          copyBtn.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+            <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-520q0-17 11.5-28.5T160-720q17 0 28.5 11.5T200-680v520h400q17 0 28.5 11.5T640-120q0 17-11.5 28.5T600-80H200Zm160-240v-480 480Z"/>
+          </svg>Copiar lista de palavras`;
+        },1500);
+      })
+      .catch(err=>{
+        copyBtn.textContent="Erro";
+        console.error(err);
+      });
+  }
+});
+</script>
+</body>
+</html>
